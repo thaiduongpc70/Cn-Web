@@ -1,0 +1,23 @@
+{
+  "name": "medical-cost-prediction",
+  "version": "1.0.0",
+  "description": "Website dự đoán chi phí y tế bằng ExpressJS MVC",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "jsonwebtoken": "^9.0.3",
+    "ml-regression-multivariate-linear": "^2.0.4",
+    "mysql2": "^3.22.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
