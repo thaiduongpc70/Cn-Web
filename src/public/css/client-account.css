@@ -1,0 +1,32 @@
+.profile-layout,
+.orders-layout,
+.content-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.info-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.info-card h3 {
+  margin: 0 0 10px;
+}
+
+.order-card {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 780px) {
+  .profile-layout,
+  .orders-layout,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}

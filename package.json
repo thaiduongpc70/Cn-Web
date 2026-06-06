@@ -1,0 +1,31 @@
+{
+  "name": "bantrasua",
+  "version": "1.0.0",
+  "description": "Website ban tra sua ReactJS + NodeJS Express theo database qltrasua",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "client:dev": "vite --config client/vite.config.js",
+    "client:build": "vite build --config client/vite.config.js",
+    "build": "npm run client:build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "bcryptjs": "^2.4.3",
+    "connect-flash": "^0.1.1",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "method-override": "^3.0.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.10.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^5.4.11"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

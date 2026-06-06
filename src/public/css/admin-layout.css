@@ -1,0 +1,119 @@
+.admin-app {
+  background: #f6f8fa;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  background: #162230;
+  color: #d9e7f3;
+  height: 100vh;
+  overflow: auto;
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+}
+
+.admin-sidebar .brand {
+  color: #fff;
+  margin: 0 8px 18px;
+}
+
+.admin-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-nav-group {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.admin-nav-group summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  font-weight: 900;
+  justify-content: space-between;
+  letter-spacing: 0;
+  list-style: none;
+  padding: 11px 12px;
+  text-transform: uppercase;
+}
+
+.admin-nav-group summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-nav-group summary small {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 11px;
+  height: 22px;
+  justify-content: center;
+  min-width: 22px;
+}
+
+.admin-nav-group[open] {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-nav-items {
+  display: grid;
+  gap: 4px;
+  padding: 0 6px 8px;
+}
+
+.admin-nav button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  color: #d9e7f3;
+  display: flex;
+  font-weight: 850;
+  gap: 10px;
+  justify-content: flex-start;
+  min-height: 42px;
+  padding: 9px 10px;
+  text-align: left;
+  width: 100%;
+}
+
+.admin-nav button.active,
+.admin-nav button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.admin-content {
+  min-width: 0;
+  padding: 28px;
+}
+
+.admin-topbar {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 14px;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+  min-height: 64px;
+  padding: 12px 18px;
+}
+
+.admin-user-name {
+  color: var(--green-800);
+}
+
+.admin-user-name:hover {
+  background: var(--green-50);
+}

@@ -1,0 +1,117 @@
+.status-pill {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 5px 9px;
+}
+
+.status-Completed,
+.status-Paid,
+.status-Delivered,
+.status-Paid {
+  background: var(--green-100);
+  color: var(--green-800);
+}
+
+.status-Pending,
+.status-Assigned {
+  background: #eef2f5;
+  color: #465260;
+}
+
+.status-Preparing,
+.status-Delivering,
+.status-Picked_Up {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.status-Cancelled,
+.status-Refunded,
+.status-Failed {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.import-lines {
+  display: grid;
+  gap: 10px;
+}
+
+.import-line {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 110px 130px auto;
+}
+
+@media (max-width: 1180px) {
+  .admin-app {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    height: auto;
+    position: static;
+  }
+
+  .admin-nav {
+    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-filter-bar,
+  .dashboard-filter-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-search,
+  .filter-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-content {
+    padding: 18px;
+  }
+
+  .admin-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resource-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-filter-bar,
+  .dashboard-filter-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-search,
+  .filter-actions {
+    grid-column: auto;
+  }
+
+  .import-line {
+    grid-template-columns: 1fr;
+  }
+}

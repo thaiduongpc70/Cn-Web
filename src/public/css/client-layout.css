@@ -1,0 +1,171 @@
+.client-app {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(47, 168, 97, 0.14), transparent 34%),
+    linear-gradient(180deg, #ffffff 0, #eef9f4 92px, #f7fbf8 100%);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.client-header {
+  background: linear-gradient(90deg, #18a85b 0%, #21bf73 52%, #0f8f52 100%);
+  border-bottom: 0;
+  box-shadow: 0 14px 34px rgba(14, 103, 59, 0.22);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.client-nav {
+  align-items: center;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr auto 1fr;
+  margin: 0 auto;
+  max-width: 1360px;
+  padding: 14px 24px;
+}
+
+.brand {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  display: inline-flex;
+  font-size: 26px;
+  font-weight: 900;
+  gap: 12px;
+  letter-spacing: 0;
+  padding: 0;
+  width: max-content;
+}
+
+.brand .icon-chip {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+.client-menu {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.client-menu button {
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 850;
+  min-height: 38px;
+  padding: 8px 14px;
+}
+
+.client-menu button.active {
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(7, 87, 46, 0.18);
+  color: var(--green-700);
+}
+
+.client-user {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.client-user > strong,
+.user-name-button {
+  color: #fff;
+}
+
+.user-name-button {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 900;
+  padding: 8px 6px;
+}
+
+.user-name-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  text-decoration: underline;
+}
+
+.client-user .btn-light {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+.client-user .btn-primary {
+  background: #fff;
+  color: var(--green-800);
+  box-shadow: 0 10px 24px rgba(7, 87, 46, 0.18);
+}
+
+.dashboard-button {
+  background: #fff;
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 24px rgba(7, 87, 46, 0.18);
+  color: var(--green-800);
+  font-weight: 900;
+  min-height: 42px;
+  padding: 10px 14px;
+}
+
+.cart-button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--radius);
+  color: #fff;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  height: 46px;
+  justify-content: center;
+  min-width: 56px;
+  padding: 0 14px;
+  position: relative;
+}
+
+.cart-symbol {
+  color: #fff;
+  font-size: 14px;
+}
+
+.cart-symbol svg {
+  fill: currentColor;
+}
+
+.cart-count-badge {
+  align-items: center;
+  background: #e5383b;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 12px;
+  height: 24px;
+  justify-content: center;
+  min-width: 24px;
+  padding: 0 6px;
+  position: absolute;
+  right: -8px;
+  top: -9px;
+}
+
+.client-main {
+  flex: 1 0 auto;
+  margin: 0 auto;
+  max-width: 1360px;
+  padding: 28px 24px 52px;
+  width: 100%;
+}
