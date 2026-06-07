@@ -10,6 +10,7 @@ import {
 } from './AdminConfig.jsx';
 import { ResourceForm } from '../partials/AdminResourceForm.jsx';
 import { ImportCreator } from './imports/ImportCreator.jsx';
+import { RecipeTemplateCreator } from './recipes/RecipeTemplateCreator.jsx';
 
 export function ResourceView({ active, meta, notify }) {
   const [rows, setRows] = useState([]);
@@ -18,8 +19,7 @@ export function ResourceView({ active, meta, notify }) {
   const [editingRow, setEditingRow] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [products, setProducts] = useState([]);
+  const [formOptions, setFormOptions] = useState({});
   const [filtersByResource, setFiltersByResource] = useState({});
   const definition = meta.resources.find((item) => item.key === active);
   const navEntry = adminResources.find(([key]) => key === active);
@@ -55,10 +55,9 @@ export function ResourceView({ active, meta, notify }) {
         setMaterials(materialResult.data);
         setSuppliers(supplierResult.data);
       }
-      if (active === 'product-discounts') {
-        const [categoryResult, productResult] = await Promise.all([api.admin.list('categories', { limit: 1000 }), api.admin.list('products', { limit: 1000 })]);
-        setCategories(categoryResult.data);
-        setProducts(productResult.data);
+      if (!definition.readOnly && active !== 'dashboard') {
+        const optionResult = await api.admin.productFormOptions();
+        setFormOptions(optionResult.data || {});
       }
     } catch (error) {
       notify(error.message);
@@ -91,10 +90,15 @@ export function ResourceView({ active, meta, notify }) {
   }
 
   async function remove(row) {
-    if (!window.confirm(`Xóa dữ liệu #${row.id}?`)) return;
+    const message = active === 'products'
+      ? `Xóa sản phẩm #${row.id}? Nếu sản phẩm đã có đơn hàng, hệ thống sẽ ẩn sản phẩm và dọn công thức/giỏ hàng liên quan để giữ lịch sử đơn.`
+      : active === 'product-recipes'
+        ? `Xóa dòng công thức #${row.id}? Giá vốn sản phẩm sẽ được tính lại.`
+        : `Xóa dữ liệu #${row.id}?`;
+    if (!window.confirm(message)) return;
     try {
       await api.admin.remove(active, row.id);
-      notify('Đã xóa dữ liệu.');
+      notify(active === 'products' ? 'Đã xóa hoặc ẩn sản phẩm.' : 'Đã xóa dữ liệu.');
       load();
     } catch (error) {
       notify(error.message);
@@ -215,11 +219,15 @@ export function ResourceView({ active, meta, notify }) {
         <ImportCreator materials={materials} suppliers={suppliers} onDone={load} notify={notify} />
       )}
 
+      {active === 'product-recipes' && !definition.readOnly && (
+        <RecipeTemplateCreator products={formOptions.products || []} templates={formOptions.recipe_templates || []} onDone={load} notify={notify} />
+      )}
+
       {showForm && !definition.readOnly && (
         <ResourceForm
           definition={{ ...definition, key: active }}
           editingRow={editingRow}
-          options={{ categories, products }}
+          options={formOptions}
           onCancel={() => { setShowForm(false); setEditingRow(null); }}
           onSubmit={save}
         />

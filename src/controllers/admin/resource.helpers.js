@@ -2,6 +2,24 @@
 const { hashPassword } = require('../../utils/password');
 const { resourceDefinitions, resourceFilterConfig, booleanFields } = require('./resource.config');
 
+const dateTimeFields = new Set([
+  'start_date',
+  'end_date',
+  'starts_at',
+  'ends_at',
+  'published_at',
+  'import_date',
+  'paid_at',
+  'delivered_at',
+  'estimated_arrival',
+  'used_at',
+  'started_at',
+  'ended_at',
+  'received_at'
+]);
+
+const dateOnlyFields = new Set(['expected_date', 'manufacturing_date', 'expiry_date', 'stat_date']);
+
 function normalizeData(data) {
   const normalized = {};
 
@@ -52,10 +70,33 @@ function cleanDate(value) {
 }
 
 function normalizeDateTime(value) {
-  const text = String(value || '').trim().replace('T', ' ');
+  const original = String(value || '').trim();
+  if (!original) return original;
+
+  const parsed = new Date(original);
+  if (!Number.isNaN(parsed.getTime()) && /[TZ]|[+-]\d{2}:?\d{2}$/.test(original)) {
+    const year = parsed.getFullYear();
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const day = String(parsed.getDate()).padStart(2, '0');
+    const hour = String(parsed.getHours()).padStart(2, '0');
+    const minute = String(parsed.getMinutes()).padStart(2, '0');
+    const second = String(parsed.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+  }
+
+  const text = original.replace('T', ' ');
   if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(text)) {
     return `${text}:00`;
   }
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(text)) {
+    return text.slice(0, 19);
+  }
+  return text;
+}
+
+function normalizeDateOnly(value) {
+  const text = String(value || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
   return text;
 }
 
@@ -130,10 +171,16 @@ function preparePayload(resource, body, isUpdate = false) {
     delete data.image_url;
   }
 
-  if (resource === 'product-discounts') {
-    if (data.start_date) data.start_date = normalizeDateTime(data.start_date);
-    if (data.end_date) data.end_date = normalizeDateTime(data.end_date);
+  Object.keys(data).forEach((field) => {
+    if (dateTimeFields.has(field) && data[field]) {
+      data[field] = normalizeDateTime(data[field]);
+    }
+    if (dateOnlyFields.has(field) && data[field]) {
+      data[field] = normalizeDateOnly(data[field]);
+    }
+  });
 
+  if (resource === 'product-discounts') {
     if (data.scope === 'Category') {
       data.product_id = null;
     }

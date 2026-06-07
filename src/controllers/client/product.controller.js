@@ -28,17 +28,26 @@ const productDetail = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: 'Không tìm thấy sản phẩm.' });
   }
 
-  const recipes = await query(
-    `SELECT pr.*, m.name AS material_name, m.unit
-     FROM product_recipes pr
-     JOIN materials m ON m.id = pr.material_id
-     WHERE pr.product_id = ?
-     ORDER BY pr.id ASC`,
-    [req.params.id]
-  );
-  const toppings = await getAllToppings();
+  const [recipes, toppings, images] = await Promise.all([
+    query(
+      `SELECT pr.*, m.name AS material_name, m.unit
+       FROM product_recipes pr
+       JOIN materials m ON m.id = pr.material_id
+       WHERE pr.product_id = ?
+       ORDER BY pr.id ASC`,
+      [req.params.id]
+    ),
+    getAllToppings(),
+    query(
+      `SELECT id, image_url, is_primary, display_order
+       FROM product_images
+       WHERE product_id = ?
+       ORDER BY is_primary DESC, display_order ASC, id DESC`,
+      [req.params.id]
+    )
+  ]);
 
-  res.json({ data: { ...formatProductRows(rows)[0], recipes, toppings } });
+  res.json({ data: { ...formatProductRows(rows)[0], recipes, toppings, images } });
 });
 
 module.exports = {

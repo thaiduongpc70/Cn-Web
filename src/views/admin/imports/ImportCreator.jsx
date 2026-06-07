@@ -1,10 +1,25 @@
 ﻿import React, { useState } from 'react';
 import { api } from '../../../../client/src/api.js';
+import { money } from '../../../../client/src/utils.js';
 
 export function ImportCreator({ materials, suppliers, onDone, notify }) {
   const [supplierId, setSupplierId] = useState('');
   const [note, setNote] = useState('');
   const [lines, setLines] = useState([{ material_id: '', quantity: 1, unit_price: 0 }]);
+
+  function updateLine(index, patch) {
+    setLines((current) => current.map((line, lineIndex) => (
+      lineIndex === index ? { ...line, ...patch } : line
+    )));
+  }
+
+  function selectMaterial(index, materialId) {
+    const material = materials.find((item) => String(item.id) === String(materialId));
+    updateLine(index, {
+      material_id: materialId,
+      unit_price: material?.last_import_price || material?.average_cost || ''
+    });
+  }
 
   async function submit(event) {
     event.preventDefault();
@@ -45,46 +60,49 @@ export function ImportCreator({ materials, suppliers, onDone, notify }) {
       <div className="import-lines" style={{ marginTop: 14 }}>
         {lines.map((line, index) => (
           <div className="import-line" key={index}>
-            <select
-              className="select"
-              value={line.material_id}
-              onChange={(event) => {
-                const next = [...lines];
-                next[index] = { ...line, material_id: event.target.value };
-                setLines(next);
-              }}
-            >
-              <option value="">Chọn nguyên liệu</option>
-              {materials.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name} ({item.unit})
-                </option>
-              ))}
-            </select>
-            <input
-              className="input"
-              type="number"
-              min="0"
-              step="0.01"
-              value={line.quantity}
-              onChange={(event) => {
-                const next = [...lines];
-                next[index] = { ...line, quantity: event.target.value };
-                setLines(next);
-              }}
-            />
-            <input
-              className="input"
-              type="number"
-              min="0"
-              step="1000"
-              value={line.unit_price}
-              onChange={(event) => {
-                const next = [...lines];
-                next[index] = { ...line, unit_price: event.target.value };
-                setLines(next);
-              }}
-            />
+            <label className="field">
+              <span>Nguyên liệu</span>
+              <select
+                className="select"
+                value={line.material_id}
+                onChange={(event) => selectMaterial(index, event.target.value)}
+              >
+                <option value="">Chọn nguyên liệu</option>
+                {materials.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({item.unit})
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span>Số lượng</span>
+              <input
+                className="input"
+                type="number"
+                min="0"
+                step="0.01"
+                value={line.quantity}
+                placeholder="VD: 10"
+                onChange={(event) => updateLine(index, { quantity: event.target.value })}
+              />
+            </label>
+            <label className="field">
+              <span>Đơn giá nhập</span>
+              <input
+                className="input"
+                type="number"
+                min="0"
+                step="1000"
+                value={line.unit_price}
+                placeholder="VD: 25000"
+                onChange={(event) => updateLine(index, { unit_price: event.target.value })}
+              />
+            </label>
+            <div className="import-line-total">
+              <span>Thành tiền</span>
+              <strong>{money(Number(line.quantity || 0) * Number(line.unit_price || 0))}</strong>
+            </div>
             <button className="btn btn-danger btn-small" type="button" onClick={() => setLines(lines.filter((_, i) => i !== index))}>
               Xóa
             </button>

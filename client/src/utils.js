@@ -106,7 +106,7 @@ export function fieldLabel(field) {
     total_amount: 'Tổng tiền',
     paid_amount: 'Số tiền đã ghi nhận',
     import_date: 'Ngày nhập',
-    import_code: 'Mã phiếu nhập',
+    import_code: 'Mã phiếu',
     expected_date: 'Ngày dự kiến',
     invoice_number: 'Số hóa đơn NCC',
     note: 'Ghi chú',

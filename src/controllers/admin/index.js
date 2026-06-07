@@ -3,5 +3,6 @@
   ...require('./dashboard.controller'),
   ...require('./order.controller'),
   ...require('./import.controller'),
+  ...require('./product-meta.controller'),
   ...require('./report.controller')
 };

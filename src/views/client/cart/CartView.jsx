@@ -82,7 +82,8 @@ export function CartView({ user, setView, notify, refreshCart, pendingVoucherCod
   }
 
   async function applyPromotion(code = promotionCode) {
-    const normalizedCode = code.trim();
+    const sourceCode = typeof code === 'string' ? code : promotionCode;
+    const normalizedCode = sourceCode.trim();
     if (!normalizedCode) {
       notify('Vui lòng nhập mã giảm giá.');
       return;
@@ -193,7 +194,7 @@ export function CartView({ user, setView, notify, refreshCart, pendingVoucherCod
             <label>Mã giảm giá</label>
             <div className="row">
               <input className="input" value={promotionCode} onChange={(event) => setPromotionCode(event.target.value)} placeholder="WELCOME20" />
-              <button type="button" className="btn btn-outline" onClick={applyPromotion}>
+              <button type="button" className="btn btn-outline" onClick={() => applyPromotion()}>
                 Áp mã
               </button>
             </div>

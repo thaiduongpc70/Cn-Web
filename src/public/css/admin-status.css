@@ -40,9 +40,31 @@
 }
 
 .import-line {
+  align-items: end;
   display: grid;
-  gap: 8px;
-  grid-template-columns: 1fr 110px 130px auto;
+  gap: 10px;
+  grid-template-columns: minmax(240px, 1fr) 120px 150px 140px auto;
+}
+
+.import-line-total {
+  background: #f7faf9;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 4px;
+  min-height: 42px;
+  padding: 8px 10px;
+}
+
+.import-line-total span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.import-line-total strong {
+  color: var(--green-800);
+  font-size: 14px;
 }
 
 @media (max-width: 1180px) {

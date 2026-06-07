@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { dateTime, fieldLabel, isImageUrl, money, statusClass, truncate } from '../../../client/src/utils.js';
+import { dateTime, fieldLabel, isImageUrl, money, shortDate, statusClass, truncate } from '../../../client/src/utils.js';
 
 export const adminResourceGroups = [
   {
@@ -132,6 +132,7 @@ const dateFields = new Set([
   'received_at',
   'stat_date'
 ]);
+const dateOnlyFields = new Set(['expected_date', 'manufacturing_date', 'expiry_date', 'stat_date']);
 export const booleanFields = new Set(['is_active', 'is_best_seller', 'is_primary', 'is_published', 'recipe_required', 'is_optional', 'is_closed']);
 export const enumOptions = {
   membership_rank: ['Silver', 'Gold', 'VIP'],
@@ -185,6 +186,7 @@ export function renderAdminCell(key, value, row) {
   if (booleanFields.has(key)) return value ? <span className="badge badge-green">Bật</span> : <span className="badge badge-gray">Tắt</span>;
   if (key === 'discount_value' && row.discount_type === 'Percent') return `${Number(value)}%`;
   if (moneyFields.has(key)) return money(value);
+  if (dateOnlyFields.has(key)) return shortDate(value);
   if (dateFields.has(key)) return dateTime(value);
   if (isImageUrl(value)) return <img src={value} alt="" style={{ width: 76, height: 52, objectFit: 'cover', borderRadius: 8 }} />;
   if (String(value).length > 90) return truncate(value, 90);

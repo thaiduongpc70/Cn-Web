@@ -759,14 +759,124 @@ BEGIN
     IF NEW.import_code IS NULL OR NEW.import_code = '' THEN
         SET NEW.import_code = CONCAT('PN', DATE_FORMAT(COALESCE(NEW.import_date, NOW()), '%Y%m%d'), '-', LPAD(FLOOR(RAND() * 1000000), 6, '0'));
     END IF;
+    IF NEW.expected_date IS NULL THEN
+        SET NEW.expected_date = DATE_ADD(DATE(COALESCE(NEW.import_date, NOW())), INTERVAL (2 + FLOOR(RAND() * 4)) DAY);
+    END IF;
+    IF NEW.invoice_number IS NULL OR NEW.invoice_number = '' THEN
+        SET NEW.invoice_number = CONCAT('INV-', DATE_FORMAT(COALESCE(NEW.import_date, NOW()), '%Y%m%d%H%i%s'), '-', LPAD(FLOOR(RAND() * 10000), 4, '0'));
+    END IF;
+END$$
+
+CREATE TRIGGER trg_materials_before_insert_code
+BEFORE INSERT ON materials
+FOR EACH ROW
+BEGIN
+    IF NEW.material_code IS NULL OR NEW.material_code = '' THEN
+        SET NEW.material_code = CONCAT(
+            'MAT-',
+            CASE NEW.material_type
+                WHEN 'Tea_Base' THEN 'TEA'
+                WHEN 'Milk_Base' THEN 'MILK'
+                WHEN 'Sweetener' THEN 'SWEET'
+                WHEN 'Topping' THEN 'TOP'
+                WHEN 'Fruit' THEN 'FRU'
+                WHEN 'Powder' THEN 'POW'
+                WHEN 'Cream' THEN 'CREAM'
+                WHEN 'Packaging' THEN 'PKG'
+                ELSE 'OTH'
+            END,
+            '-',
+            DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'),
+            '-',
+            LPAD(FLOOR(RAND() * 10000), 4, '0')
+        );
+    END IF;
+END$$
+
+CREATE TRIGGER trg_import_details_before_insert_totals
+BEFORE INSERT ON import_details
+FOR EACH ROW
+BEGIN
+    IF NEW.subtotal IS NULL OR NEW.subtotal = 0 THEN
+        SET NEW.subtotal = NEW.quantity * NEW.unit_price;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_import_details_before_update_totals
+BEFORE UPDATE ON import_details
+FOR EACH ROW
+BEGIN
+    IF NEW.quantity <> OLD.quantity OR NEW.unit_price <> OLD.unit_price THEN
+        SET NEW.subtotal = NEW.quantity * NEW.unit_price;
+    END IF;
+END$$
+
+CREATE TRIGGER trg_promotions_before_insert_code
+BEFORE INSERT ON promotions
+FOR EACH ROW
+BEGIN
+    IF NEW.code IS NULL OR NEW.code = '' THEN
+        SET NEW.code = CONCAT('KM-', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), '-', LPAD(FLOOR(RAND() * 10000), 4, '0'));
+    END IF;
+    SET NEW.used_count = COALESCE(NEW.used_count, 0);
+END$$
+
+CREATE TRIGGER trg_member_gift_codes_before_insert_code
+BEFORE INSERT ON member_gift_codes
+FOR EACH ROW
+BEGIN
+    IF NEW.code IS NULL OR NEW.code = '' THEN
+        SET NEW.code = CONCAT('GIFT-', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), '-', LPAD(FLOOR(RAND() * 10000), 4, '0'));
+    END IF;
+    SET NEW.used_count = COALESCE(NEW.used_count, 0);
+END$$
+
+CREATE TRIGGER trg_news_posts_before_insert_slug
+BEFORE INSERT ON news_posts
+FOR EACH ROW
+BEGIN
+    IF NEW.slug IS NULL OR NEW.slug = '' THEN
+        SET NEW.slug = CONCAT('bai-viet-', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), '-', LPAD(FLOOR(RAND() * 10000), 4, '0'));
+    END IF;
+END$$
+
+CREATE TRIGGER trg_payments_before_insert_code
+BEFORE INSERT ON payments
+FOR EACH ROW
+BEGIN
+    IF NEW.status = 'Paid' AND (NEW.transaction_code IS NULL OR NEW.transaction_code = '') THEN
+        SET NEW.transaction_code = CONCAT('PAY-', NEW.order_id, '-', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), '-', LPAD(FLOOR(RAND() * 10000), 4, '0'));
+    END IF;
+    IF NEW.status = 'Paid' AND NEW.paid_at IS NULL THEN
+        SET NEW.paid_at = NOW();
+    END IF;
 END$$
 
 CREATE TRIGGER trg_payments_before_update_paid_at
 BEFORE UPDATE ON payments
 FOR EACH ROW
 BEGIN
+    IF NEW.status = 'Paid' AND (NEW.transaction_code IS NULL OR NEW.transaction_code = '') THEN
+        SET NEW.transaction_code = CONCAT('PAY-', NEW.order_id, '-', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s'), '-', LPAD(FLOOR(RAND() * 10000), 4, '0'));
+    END IF;
     IF NEW.status = 'Paid' AND OLD.status <> 'Paid' AND NEW.paid_at IS NULL THEN
         SET NEW.paid_at = NOW();
+    END IF;
+END$$
+
+CREATE TRIGGER trg_orders_before_insert_totals
+BEFORE INSERT ON orders
+FOR EACH ROW
+BEGIN
+    SET NEW.total_amount = GREATEST(COALESCE(NEW.subtotal, 0) - COALESCE(NEW.discount_amount, 0), 0);
+END$$
+
+CREATE TRIGGER trg_orders_before_update_totals
+BEFORE UPDATE ON orders
+FOR EACH ROW
+BEGIN
+    IF NEW.subtotal <> OLD.subtotal OR NEW.discount_amount <> OLD.discount_amount THEN
+        SET NEW.total_amount = GREATEST(COALESCE(NEW.subtotal, 0) - COALESCE(NEW.discount_amount, 0), 0);
     END IF;
 END$$
 
@@ -795,6 +905,31 @@ BEGIN
     END IF;
 END$$
 
+CREATE TRIGGER trg_orders_after_completed_sales
+AFTER UPDATE ON orders
+FOR EACH ROW
+BEGIN
+    IF NEW.status = 'Completed' AND OLD.status <> 'Completed' THEN
+        UPDATE products p
+        JOIN (
+            SELECT product_id, SUM(quantity) AS sold_quantity
+            FROM order_details
+            WHERE order_id = NEW.id
+            GROUP BY product_id
+        ) sold ON sold.product_id = p.id
+        SET p.sales_count = p.sales_count + sold.sold_quantity;
+    ELSEIF OLD.status = 'Completed' AND NEW.status <> 'Completed' THEN
+        UPDATE products p
+        JOIN (
+            SELECT product_id, SUM(quantity) AS sold_quantity
+            FROM order_details
+            WHERE order_id = NEW.id
+            GROUP BY product_id
+        ) sold ON sold.product_id = p.id
+        SET p.sales_count = GREATEST(p.sales_count - sold.sold_quantity, 0);
+    END IF;
+END$$
+
 CREATE TRIGGER trg_orders_after_insert_delivery
 AFTER INSERT ON orders
 FOR EACH ROW
@@ -807,11 +942,25 @@ BEGIN
         VALUES(
             NEW.id,
             (SELECT id FROM drivers WHERE is_active = TRUE ORDER BY id ASC LIMIT 1),
-            'SOL & LUNA',
+            COALESCE(
+                (SELECT s.name FROM stores s WHERE s.is_active = TRUE ORDER BY s.display_order ASC, s.id ASC LIMIT 1),
+                'BANTRASUA'
+            ),
             NEW.delivery_address,
             'Assigned',
             DATE_ADD(NOW(), INTERVAL 30 MINUTE)
         );
+    END IF;
+END$$
+
+CREATE TRIGGER trg_stores_after_update_pickup
+AFTER UPDATE ON stores
+FOR EACH ROW
+BEGIN
+    IF NEW.name <> OLD.name THEN
+        UPDATE order_deliveries
+        SET pickup_address = NEW.name
+        WHERE pickup_address = OLD.name;
     END IF;
 END$$
 
@@ -1240,6 +1389,54 @@ BEGIN
     WHERE order_id = p_order_id;
 END$$
 
+CREATE PROCEDURE refresh_product_rollups()
+BEGIN
+    UPDATE products p
+    LEFT JOIN categories c ON c.id = p.category_id
+    SET p.sku = CONCAT(
+            CASE WHEN c.name = 'Topping' THEN 'TOP' ELSE 'DRK' END,
+            '-',
+            CASE
+                WHEN c.name = 'Trà sữa' THEN 'TS'
+                WHEN c.name = 'Trà trái cây' THEN 'TC'
+                WHEN c.name = 'Sữa tươi' THEN 'ST'
+                WHEN c.name = 'Đá xay' THEN 'DX'
+                WHEN c.name = 'Topping' THEN 'TP'
+                ELSE 'SP'
+            END,
+            '-',
+            LPAD(p.id, 5, '0')
+        ),
+        p.barcode = CONCAT('893', LPAD(p.id, 10, '0'));
+
+    UPDATE products p
+    LEFT JOIN (
+        SELECT
+            pr.product_id,
+            SUM(
+                pr.quantity
+                * (1 + pr.loss_percent / 100)
+                * COALESCE(NULLIF(m.average_cost, 0), NULLIF(m.last_import_price, 0), 0)
+            ) AS computed_cost
+        FROM product_recipes pr
+        JOIN materials m ON m.id = pr.material_id
+        LEFT JOIN product_variants pv ON pv.id = pr.variant_id
+        WHERE pr.variant_id IS NULL OR pv.variant_name = 'M'
+        GROUP BY pr.product_id
+    ) costs ON costs.product_id = p.id
+    SET p.base_cost = COALESCE(costs.computed_cost, 0);
+
+    UPDATE products p
+    LEFT JOIN (
+        SELECT od.product_id, SUM(od.quantity) AS sold_quantity
+        FROM order_details od
+        JOIN orders o ON o.id = od.order_id
+        WHERE o.status = 'Completed'
+        GROUP BY od.product_id
+    ) sold ON sold.product_id = p.id
+    SET p.sales_count = COALESCE(sold.sold_quantity, 0);
+END$$
+
 CREATE PROCEDURE refresh_revenue_statistics()
 BEGIN
     TRUNCATE TABLE revenue_daily_stats;
@@ -1264,7 +1461,7 @@ BEGIN
         SUM(o.status = 'Completed'),
         SUM(o.status = 'Cancelled'),
         COUNT(*),
-        COALESCE(SUM(items.items_sold), 0),
+        COALESCE(SUM(CASE WHEN o.status = 'Completed' THEN items.items_sold ELSE 0 END), 0),
         CASE WHEN SUM(o.status = 'Completed') > 0
             THEN SUM(CASE WHEN o.status = 'Completed' THEN o.total_amount ELSE 0 END) / SUM(o.status = 'Completed')
             ELSE 0
@@ -2141,20 +2338,7 @@ BEGIN
         SET v_user_id = v_user_id + 1;
     END WHILE;
 
-    UPDATE products
-    SET view_count = view_count + 800 + MOD(id * 83, 900)
-    WHERE id > 0;
-
-    UPDATE products p
-    LEFT JOIN (
-        SELECT od.product_id, SUM(od.quantity) AS sold_quantity
-        FROM order_details od
-        JOIN orders o ON o.id = od.order_id
-        WHERE o.status = 'Completed'
-        GROUP BY od.product_id
-    ) sold ON sold.product_id = p.id
-    SET p.sales_count = GREATEST(p.sales_count, COALESCE(sold.sold_quantity, 0))
-    WHERE p.id > 0;
+    CALL refresh_product_rollups();
 
     UPDATE promotions p
     SET used_count = (
@@ -2168,5 +2352,7 @@ END$$
 DELIMITER ;
 
 CALL seed_large_demo_data();
+CALL refresh_product_rollups();
+UPDATE products SET view_count = 0 WHERE id > 0;
 CALL refresh_revenue_statistics();
 DROP PROCEDURE IF EXISTS seed_large_demo_data;

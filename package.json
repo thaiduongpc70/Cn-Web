@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "client:dev": "vite --config client/vite.config.js",
-    "client:build": "vite build --config client/vite.config.js",
+    "client:dev": "node server.js client-dev",
+    "client:build": "node server.js build-client",
     "build": "npm run client:build"
   },
   "dependencies": {

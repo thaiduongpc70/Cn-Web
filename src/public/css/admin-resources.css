@@ -78,8 +78,71 @@
   margin: 0 0 14px;
 }
 
+.form-summary {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.form-summary div {
+  background: #f8fafb;
+  border-right: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+  min-height: 72px;
+  padding: 12px;
+}
+
+.form-summary div:nth-child(-n + 3) {
+  border-top: 0;
+}
+
+.form-summary div:nth-child(3n) {
+  border-right: 0;
+}
+
+.form-summary span,
+.quick-recipe-note span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.form-summary strong,
+.quick-recipe-note strong {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.quick-recipe-form {
+  border-color: #cfe4dc;
+}
+
 .low-stock {
   background: var(--warning-bg);
   color: var(--warning);
   font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .form-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .form-summary div,
+  .form-summary div:nth-child(3n),
+  .form-summary div:nth-child(-n + 3) {
+    border-right: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .form-summary div:first-child {
+    border-top: 0;
+  }
 }

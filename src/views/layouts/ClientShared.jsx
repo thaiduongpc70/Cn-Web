@@ -9,7 +9,7 @@ export { fallbackImage };
 
 function buildQrPattern(text) {
   let hash = 0;
-  const source = text || 'BANTRASUA';
+  const source = text || 'T';
   for (let index = 0; index < source.length; index += 1) {
     hash = ((hash << 5) - hash + source.charCodeAt(index)) >>> 0;
   }

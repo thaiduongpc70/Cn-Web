@@ -118,6 +118,7 @@
                   LIMIT 12
                 ) ranked
               ) best_rank ON best_rank.id = p.id
+              WHERE p.is_active = TRUE
               ORDER BY p.id DESC`
   },
   'product-images': {
@@ -126,6 +127,7 @@
     listSql: `SELECT pi.*, p.name AS product_name
               FROM product_images pi
               JOIN products p ON p.id = pi.product_id
+              WHERE p.is_active = TRUE
               ORDER BY pi.product_id ASC, pi.display_order ASC, pi.id DESC`
   },
   'product-variants': {
@@ -134,6 +136,7 @@
     listSql: `SELECT pv.*, p.name AS product_name
               FROM product_variants pv
               JOIN products p ON p.id = pv.product_id
+              WHERE p.is_active = TRUE
               ORDER BY pv.product_id ASC, pv.display_order ASC, pv.id ASC`
   },
   'product-discounts': {
@@ -146,6 +149,7 @@
               FROM product_discounts pd
               LEFT JOIN categories c ON c.id = pd.category_id
               LEFT JOIN products p ON p.id = pd.product_id
+              WHERE p.id IS NULL OR p.is_active = TRUE
               ORDER BY pd.is_active DESC, pd.priority DESC, pd.end_date DESC, pd.id DESC`
   },
   materials: {
@@ -182,6 +186,7 @@
               JOIN products p ON p.id = pr.product_id
               LEFT JOIN product_variants pv ON pv.id = pr.variant_id
               JOIN materials m ON m.id = pr.material_id
+              WHERE p.is_active = TRUE
               ORDER BY pr.product_id ASC, COALESCE(pv.display_order, 0) ASC, pr.step_order ASC, pr.id ASC`
   },
   'material-imports': {
@@ -199,7 +204,10 @@
   'import-details': {
     table: 'import_details',
     fields: ['import_id', 'material_id', 'batch_code', 'quantity', 'unit_price', 'subtotal', 'manufacturing_date', 'expiry_date', 'note'],
-    listSql: `SELECT idt.*, m.name AS material_name, m.unit, mi.import_code, mi.import_date
+    listSql: `SELECT idt.id, mi.import_code, m.name AS material_name, idt.batch_code,
+                     idt.quantity, idt.unit_price, idt.subtotal,
+                     idt.manufacturing_date, idt.expiry_date, idt.note,
+                     m.unit, idt.import_id, idt.material_id, mi.import_date
               FROM import_details idt
               JOIN materials m ON m.id = idt.material_id
               JOIN material_imports mi ON mi.id = idt.import_id

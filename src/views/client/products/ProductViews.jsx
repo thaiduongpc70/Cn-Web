@@ -305,6 +305,7 @@ export function ProductDetailView({ productId, setView, onAdd, notify }) {
   const [sugarLevel, setSugarLevel] = useState('Bình thường');
   const [selectedToppings, setSelectedToppings] = useState([]);
   const [quantity, setQuantity] = useState(1);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     if (!productId) return;
@@ -319,12 +320,27 @@ export function ProductDetailView({ productId, setView, onAdd, notify }) {
         setSugarLevel('Bình thường');
         setSelectedToppings([]);
         setQuantity(1);
+        setActiveImageIndex(0);
       })
       .catch((error) => notify(error.message));
   }, [productId]);
 
+  useEffect(() => {
+    const imageCount = product?.images?.length || 0;
+    if (imageCount < 2) return undefined;
+
+    const timer = window.setInterval(() => {
+      setActiveImageIndex((index) => (index + 1) % imageCount);
+    }, 3600);
+
+    return () => window.clearInterval(timer);
+  }, [product?.id, product?.images?.length]);
+
   if (!product) return <div className="loading">Đang tải chi tiết sản phẩm...</div>;
 
+  const detailImages = product.images?.length
+    ? product.images
+    : [{ id: 'fallback', image_url: product.image_url || fallbackImage }];
   const isToppingProduct = product.category_name === 'Topping';
   const selectedVariant = product.variants?.find((variant) => String(variant.id) === String(variantId));
   const toppingTotal = selectedToppings.reduce((sum, id) => {
@@ -365,7 +381,29 @@ export function ProductDetailView({ productId, setView, onAdd, notify }) {
       </div>
       <section className="product-detail">
         <div className="detail-media">
-          <img src={product.image_url || fallbackImage} alt={product.name} />
+          <div className="detail-carousel">
+            {detailImages.map((image, index) => (
+              <img
+                key={image.id || image.image_url || index}
+                className={classNames('detail-slide', index === activeImageIndex && 'active')}
+                src={image.image_url || fallbackImage}
+                alt={product.name}
+              />
+            ))}
+          </div>
+          {detailImages.length > 1 && (
+            <div className="detail-dots" aria-label="Ảnh sản phẩm">
+              {detailImages.map((image, index) => (
+                <button
+                  type="button"
+                  key={image.id || image.image_url || index}
+                  className={classNames(index === activeImageIndex && 'active')}
+                  aria-label={`Xem ảnh ${index + 1}`}
+                  onClick={() => setActiveImageIndex(index)}
+                />
+              ))}
+            </div>
+          )}
           {isOutOfStock ? (
             <span className="sold-out-badge detail-hot" title="Sản phẩm hết hàng">
               Hết hàng

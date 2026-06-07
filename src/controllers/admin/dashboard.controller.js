@@ -1,8 +1,11 @@
 ﻿const { query } = require('../../config/db');
 const asyncHandler = require('../../utils/asyncHandler');
 const { cleanDate, buildDateWhere } = require('./resource.helpers');
+const { refreshRevenueStatistics } = require('./revenue.helpers');
 
 const dashboard = asyncHandler(async (req, res) => {
+  await refreshRevenueStatistics();
+
   const fromDate = cleanDate(req.query.from);
   const toDate = cleanDate(req.query.to);
   const keyword = String(req.query.q || '').trim();
@@ -49,7 +52,7 @@ const dashboard = asyncHandler(async (req, res) => {
     query(
       `SELECT COALESCE(SUM(total_amount), 0) AS revenue
        FROM orders
-       WHERE status IN ('Paid', 'Preparing', 'Completed')${orderDateFilter.sql}`,
+       WHERE status = 'Completed'${orderDateFilter.sql}`,
       orderDateFilter.values
     ),
     query('SELECT * FROM revenue_daily_stats WHERE stat_date = CURDATE() LIMIT 1'),
